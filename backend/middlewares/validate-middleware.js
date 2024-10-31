@@ -4,6 +4,6 @@ export const validate = (schema) => async (req, res, next) => {
     req.body = parseBody;
     next();
   } catch (err) {
-    res.status(422).json({ message: err.errors});
+    res.status(422).json({ errors: err.errors});
   }
 };

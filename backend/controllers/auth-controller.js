@@ -9,7 +9,7 @@ import { generateRefreshToken, generateToken } from "../utils/token.js";
 export const registerUser = catchAsync(async (req, res, next) => {
   const user = await User.create(req.body);
 
-  res.status(201).json({success: true, user });
+  res.status(201).json({ success: true, user });
 });
 
 // @desc Login a user
@@ -24,26 +24,37 @@ export const loginUser = catchAsync(async (req, res, next) => {
 
   // 2. Compare the provided password with the stored hashed password
   const match = await user.compareHashPassword(password);
-  if (match) {  
-    // 3. Create the JWT payload
-    const payload = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    };
+  if (!match) return next(new AppError("Incorrect Password", 401));
 
-    // 4. Generate access token and refresh token
-    const accessToken = generateToken(payload);
-    const refreshToken = generateRefreshToken(payload);
+  // 3. Create the JWT payload
+  const payload = {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
 
-    // 5. Send refresh token as a cookie and access token in the response
-    res.cookie("refreshToken", refreshToken, {
-      sameSite: false,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-      httpOnly: true,
-      secure: false,
-    });
-    res.status(200).json({ token: accessToken });
+  // 4. Generate access token and refresh token
+  const accessToken = generateToken(payload);
+  const refreshToken = generateRefreshToken(payload);
+
+  // 5. Send refresh token as a cookie and access token in the response
+  res.cookie("refreshToken", refreshToken, {
+    sameSite: false,
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+    httpOnly: true,
+    secure: false,
+  });
+  res.status(200).json({ token: accessToken });
+});
+
+export const logoutUser = catchAsync(async (req, res, next) => {
+  const { refreshToken } = req.cookies;
+
+  if (refreshToken) {
+    res.clearCookie("refreshToken");
+    res.json({ message: "Logout successfully" });
   }
 });
+
+export const forgotPassword = catchAsync(async (req, res, next) => {});
