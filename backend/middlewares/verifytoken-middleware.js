@@ -1,12 +1,12 @@
-import { verifyJwtToken } from "../utils/token.js";
+import { verifyToken } from "../utils/token.js";
 
-export const verifyToken = (req, res, next) => {
+export const verifyTokenHandler = (req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
   if (!token) {
     return res.status(401).json({ message: "Access denied. No token provided." });
   }
 
-  const decoded = verifyJwtToken(token);
+  const decoded = verifyToken(token, process.env.JWT_SECRET_KEY);
   if (!decoded) {
     return res.status(403).json({ message: "Invalid token." });
   }

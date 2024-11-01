@@ -12,9 +12,9 @@ export const generateRefreshToken = (payload) => {
   });
 };
 
-export const verifyJwtToken = (token) => {
+export const verifyToken = (token, secretKey) => {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET_KEY);
+    return jwt.verify(token, secretKey);
   } catch (error) {
     return null; 
   }
